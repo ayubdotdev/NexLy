@@ -3,6 +3,7 @@ import DesktopNavbar from "./DesktopNavbar";
 import MobileNavbar from "./MobileNavbar";
 import { currentUser } from "@clerk/nextjs/server";
 import { syncUser } from "@/actions/user.action";
+import Image from "next/image";
 
 async function Navbar() {
   const user = await currentUser();
@@ -14,7 +15,12 @@ async function Navbar() {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
             <Link href="/" className="text-xl font-bold text-primary font-mono tracking-wider">
-              NexLy
+            <Image 
+            src={"/logoo.png"}
+            alt=""
+            height={55}
+            width={55}
+            />
             </Link>
           </div>
 
