@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useState } from "react";
-import { useAuth, SignInButton, SignOutButton } from "@clerk/nextjs";
+import { useAuth, SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 
@@ -20,7 +20,11 @@ function MobileNavbar() {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const { isSignedIn } = useAuth();
   const { theme, setTheme } = useTheme();
+  const { user } = useUser()
 
+  const profileUrl = user ? `/profile/${user.username ?? user.emailAddresses?.[0]?.emailAddress.split("@")[0]
+    }` : "/profile";
+    
   return (
     <div className="flex md:hidden items-center space-x-2">
       <Button
@@ -61,7 +65,10 @@ function MobileNavbar() {
                   </Link>
                 </Button>
                 <Button variant="ghost" className="flex items-center gap-3 justify-start" asChild>
-                  <Link href="/profile">
+                  <Link
+                    href={`/profile/${user?.username ?? user?.emailAddresses[0].emailAddress.split("@")[0]
+                      }`}
+                  >
                     <UserIcon className="w-4 h-4" />
                     Profile
                   </Link>

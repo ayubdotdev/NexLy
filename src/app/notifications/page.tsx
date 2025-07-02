@@ -4,8 +4,10 @@ import { NotificationsSkeleton } from '@/components/NotificationSkeleton'
 import { Avatar, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { useUser } from '@clerk/nextjs'
 import { formatDistanceToNow } from 'date-fns'
 import { HeartIcon, MessageCircleIcon, UserPlusIcon } from 'lucide-react'
+import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 
@@ -14,19 +16,23 @@ type Notifications = Awaited<ReturnType<typeof getNotifications>>
 type Notification = Notifications[number]
 
 const getNotificationIcon = (type: string) => {
-  switch (type) {
-    case "LIKE":
-      return <HeartIcon className="size-4 text-red-500" />;
-    case "COMMENT":
-      return <MessageCircleIcon className="size-4 text-blue-500" />;
-    case "FOLLOW":
-      return <UserPlusIcon className="size-4 text-green-500" />;
-    default:
-      return null;
-  }
+    switch (type) {
+        case "LIKE":
+            return <HeartIcon className="size-4 text-red-500" />;
+        case "COMMENT":
+            return <MessageCircleIcon className="size-4 text-blue-500" />;
+        case "FOLLOW":
+            return <UserPlusIcon className="size-4 text-green-500" />;
+        default:
+            return null;
+    }
 };
 
 function NotificationsPage() {
+
+    const {user} = useUser()
+    if(!user) return null
+   
     const [notifications, setNotifications] = useState<Notification[]>([])
     const [isLoading, setIsLoading] = useState(true)
 
@@ -73,7 +79,10 @@ function NotificationsPage() {
                                         }`}
                                 >
                                     <Avatar className="mt-1">
-                                        <AvatarImage src={notification.creator.image ?? "/avatar.png"} />
+                                        <Link href={`/profile/${notification.creator.username}`}>
+
+                                            <AvatarImage src={notification.creator.image ?? "/avatar.png"} />
+                                        </Link>
                                     </Avatar>
                                     <div className="flex-1 space-y-1">
                                         <div className="flex items-center gap-2">
