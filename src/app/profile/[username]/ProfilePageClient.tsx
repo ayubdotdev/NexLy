@@ -27,30 +27,44 @@ import {
   HeartIcon,
   LinkIcon,
   MapPinIcon,
+  UsersIcon,
+  UserPlusIcon,
 } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import Link from "next/link";
+import { getUserFollowers, getUserFollowing } from "@/actions/follows.action";
+import { getDbUserId } from "@/actions/user.action";
+
 
 type User = Awaited<ReturnType<typeof getProfileByUsername>>;
 type Posts = Awaited<ReturnType<typeof getUserPosts>>;
+type Followers = Awaited<ReturnType<typeof getUserFollowers>>;
+type Following = Awaited<ReturnType<typeof getUserFollowing>>;
 
 interface ProfilePageClientProps {
   user: NonNullable<User>;
   posts: Posts;
   likedPosts: Posts;
+  followers: Followers;
+  following: Following;
   isFollowing: boolean;
+  currentUserDbId: string | null; // Add this prop to pass the current user's database ID
 }
 
 function ProfilePageClient({
   isFollowing: initialIsFollowing,
   likedPosts,
   posts,
+  followers,
+  following,
   user,
 }: ProfilePageClientProps) {
   const { user: currentUser } = useUser();
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
   const [isUpdatingFollow, setIsUpdatingFollow] = useState(false);
+  const currentDbUserId = getDbUserId(); // Replace with your method
 
   const [editForm, setEditForm] = useState({
     name: user.name || "",
@@ -58,6 +72,7 @@ function ProfilePageClient({
     location: user.location || "",
     website: user.website || "",
   });
+
 
   const handleEditSubmit = async () => {
     const formData = new FormData();
@@ -191,6 +206,24 @@ function ProfilePageClient({
               Posts
             </TabsTrigger>
             <TabsTrigger
+              value="followers"
+              className="flex items-center gap-2 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary
+               data-[state=active]:bg-transparent px-6 font-semibold"
+            >
+              <UsersIcon className="size-4" />
+              Followers
+            </TabsTrigger>
+
+            <TabsTrigger
+              value="following"
+              className="flex items-center gap-2 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary
+               data-[state=active]:bg-transparent px-6 font-semibold"
+            >
+              <UserPlusIcon className="size-4" />
+              Following
+            </TabsTrigger>
+
+            <TabsTrigger
               value="likes"
               className="flex items-center gap-2 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary
                data-[state=active]:bg-transparent px-6 font-semibold"
@@ -210,6 +243,86 @@ function ProfilePageClient({
             </div>
           </TabsContent>
 
+          <TabsContent value="followers" className="mt-6">
+            <div className="space-y-4">
+              {followers.length > 0 ? (
+                followers.map((follower) => (
+                  <Card key={follower.id} className="p-4">
+                    <div className="flex items-center justify-between">
+                      <Link
+                        href={`/profile/${follower.username}`}
+                        className="flex items-center space-x-4 hover:opacity-80 transition-opacity"
+                      >
+                        <Avatar className="w-12 h-12">
+                          <AvatarImage src={follower.image ?? "/avatar.png"} />
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold truncate">
+                            {follower.name ?? follower.username}
+                          </p>
+                          <p className="text-sm text-muted-foreground truncate">
+                            @{follower.username}
+                          </p>
+                          {follower.bio && (
+                            <p className="text-sm text-muted-foreground truncate mt-1">
+                              {follower.bio}
+                            </p>
+                          )}
+                        </div>
+                      </Link>
+                      <div className="text-right text-sm text-muted-foreground">
+                        <div>{follower._count.followers} followers</div>
+                        <div>{follower._count.following} following</div>
+                      </div>
+                    </div>
+                  </Card>
+                ))
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">No followers yet</div>
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="following" className="mt-6">
+            <div className="space-y-4">
+              {following.length > 0 ? (
+                following.map((followingUser) => (
+                  <Card key={followingUser.id} className="p-4">
+                    <div className="flex items-center justify-between">
+                      <Link
+                        href={`/profile/${followingUser.username}`}
+                        className="flex items-center space-x-4 hover:opacity-80 transition-opacity"
+                      >
+                        <Avatar className="w-12 h-12">
+                          <AvatarImage src={followingUser.image ?? "/avatar.png"} />
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold truncate">
+                            {followingUser.name ?? followingUser.username}
+                          </p>
+                          <p className="text-sm text-muted-foreground truncate">
+                            @{followingUser.username}
+                          </p>
+                          {followingUser.bio && (
+                            <p className="text-sm text-muted-foreground truncate mt-1">
+                              {followingUser.bio}
+                            </p>
+                          )}
+                        </div>
+                      </Link>
+                      <div className="text-right text-sm text-muted-foreground">
+                        <div>{followingUser._count.followers} followers</div>
+                        <div>{followingUser._count.following} following</div>
+                      </div>
+                    </div>
+                  </Card>
+                ))
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">Not following anyone yet</div>
+              )}
+            </div>
+          </TabsContent>
+
           <TabsContent value="likes" className="mt-6">
             <div className="space-y-6">
               {likedPosts.length > 0 ? (
@@ -219,6 +332,7 @@ function ProfilePageClient({
               )}
             </div>
           </TabsContent>
+
         </Tabs>
 
         <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>

@@ -58,10 +58,27 @@ export async function markNotificationsAsRead(notificationIds: string[]) {
                 read: true,
             },
         });
-
         return { success: true };
     } catch (error) {
         console.error("Error marking notifications as read:", error);
         return { success: false };
+    }
+}
+export async function hasUnreadNotifications() {
+    try {
+        const userId = await getDbUserId()
+        if (!userId) return;
+
+        const count = await prisma.notification.count({
+            where: {
+                userId,
+                read: false
+            }
+        })
+        return count > 0;
+
+    } catch (error) {
+        console.error("Error checking unread notifications:", error);
+        return false; // Return false on error to prevent breaking the UI
     }
 }

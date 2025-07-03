@@ -6,25 +6,46 @@ import {
   LogOutIcon,
   MenuIcon,
   MoonIcon,
+  SearchIcon,
   SunIcon,
   UserIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth, SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
 import Link from "next/link";
+import { hasUnreadNotifications } from "@/actions/notification.action";
+import { cn } from "@/lib/utils";
 
 function MobileNavbar() {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [hasUnread, setHasUnread] = useState(false)
   const { isSignedIn } = useAuth();
   const { theme, setTheme } = useTheme();
   const { user } = useUser()
 
+
   const profileUrl = user ? `/profile/${user.username ?? user.emailAddresses?.[0]?.emailAddress.split("@")[0]
     }` : "/profile";
-    
+
+  useEffect(() => {
+    async function fetchUnread() {
+      try {
+        const result = await hasUnreadNotifications();
+        setHasUnread(!!result);
+      } catch (error) {
+        console.error("Failed to check unread notifications", error);
+      }
+    }
+
+    if (isSignedIn) {
+      fetchUnread();
+    }
+  }, [isSignedIn]);
+
+
   return (
     <div className="flex md:hidden items-center space-x-2">
       <Button
@@ -39,6 +60,9 @@ function MobileNavbar() {
       </Button>
 
       <Sheet open={showMobileMenu} onOpenChange={setShowMobileMenu}>
+        {hasUnread && (
+          <span className="absolute top-4 right-4 h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+        )}
         <SheetTrigger asChild>
           <Button variant="ghost" size="icon">
             <MenuIcon className="h-5 w-5" />
@@ -58,12 +82,24 @@ function MobileNavbar() {
 
             {isSignedIn ? (
               <>
-                <Button variant="ghost" className="flex items-center gap-3 justify-start" asChild>
-                  <Link href="/notifications">
+                <Button variant="ghost" className="flex items-center gap-3 justify-start relative" asChild>
+                  <Link href="/notifications" className="flex items-center gap-2">
                     <BellIcon className="w-4 h-4" />
-                    Notifications
+                    <span>Notifications</span>
+                    {hasUnread && (
+                      <span className="absolute top-2 right-2 h-3 w-3 rounded-full bg-blue-500 animate-pulse" />
+                    )}
                   </Link>
                 </Button>
+
+                <Button variant="ghost" asChild className="flex items-center gap-3 justify-start">
+                  <Link href="/search" className="flex items-center gap-2">
+                    <SearchIcon className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors duration-300" />
+                    <span className="text-sm transition-colors duration-300">Search NexLy</span>
+                  </Link>
+                </Button>
+
+
                 <Button variant="ghost" className="flex items-center gap-3 justify-start" asChild>
                   <Link
                     href={`/profile/${user?.username ?? user?.emailAddresses[0].emailAddress.split("@")[0]

@@ -3,18 +3,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { SignInButton, SignUpButton } from "@clerk/nextjs";
 import { Button } from "./ui/button";
 import { getUserByClerkId } from "@/actions/user.action";
+import Link from "next/link";
 import { Avatar, AvatarImage } from "./ui/avatar";
 import { Separator } from "./ui/separator";
 import { LinkIcon, MapPinIcon } from "lucide-react";
-import Link from "next/link";
 
 async function Sidebar() {
   const authUser = await currentUser();
   if (!authUser) return <UnAuthenticatedSidebar />;
 
-  const user = await getUserByClerkId(authUser.id)
-  if (!user) return null
-
+  const user = await getUserByClerkId(authUser.id);
+  if (!user) return null;
 
   return (
     <div className="sticky top-20">
@@ -65,15 +64,15 @@ async function Sidebar() {
                     {user.website}
                   </a>
                 ) : (
-                  "No website"      
-                )} 
+                  "No website"
+                )}
               </div>
             </div>
           </div>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
 
 export default Sidebar;

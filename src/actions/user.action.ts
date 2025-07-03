@@ -4,7 +4,6 @@ import prisma from "@/lib/prisma";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { error } from "console";
 import { revalidatePath } from "next/cache";
-import { use, useId } from "react";
 
 
 
@@ -36,7 +35,6 @@ export async function syncUser() {
         console.log("Error in syncUser", error);
     }
 }
-
 export async function getUserByClerkId(clerkId: string) {
     return prisma.user.findUnique({
         where: {
@@ -53,7 +51,6 @@ export async function getUserByClerkId(clerkId: string) {
         }
     })
 }
-
 export async function getDbUserId() {
     const { userId: clerkId } = await auth()
     if (!clerkId) return null
@@ -62,7 +59,6 @@ export async function getDbUserId() {
     if (!user) throw new Error("User Not Found")
     return user.id
 }
-
 export async function getRandomUsers() {
     try {
         const userId = await getDbUserId();
@@ -105,7 +101,6 @@ export async function getRandomUsers() {
         return [];
     }
 }
-
 export async function toggleFollow(targetUserId: string) {
     try {
         const userId = await getDbUserId();
@@ -158,5 +153,52 @@ export async function toggleFollow(targetUserId: string) {
     } catch (error) {
         console.log("Error in toggleFollow", error);
         return { success: false, error: "Error toggling follow" };
+    }
+}
+
+export async function searchUsers(query:string){
+    if(!query.trim()) return []
+    const userId = await getDbUserId()
+    if(!userId) return [];
+
+    try {
+        const users = await prisma.user.findMany({
+            where:{
+                AND: [
+                    //excluding yourself
+                    { NOT: { id: userId } },
+                    {OR:[
+                        {
+                            name:{
+                            contains:query,
+                            mode:"insensitive"
+                        }},
+                        {
+                            username:{
+                                contains:query,
+                                mode:"insensitive"
+                            }
+                        }
+
+                ]}
+
+                ]
+
+            },
+            select:{
+                id:true,
+                name:true,
+                username:true,
+                image:true
+            },
+            take:20
+            ,orderBy:{
+                createdAt:"desc"
+            }
+        })
+        return users
+    } catch (error) {
+        console.log("Error finding users")
+        return []
     }
 }

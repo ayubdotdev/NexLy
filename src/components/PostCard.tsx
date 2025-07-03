@@ -16,7 +16,7 @@ import { Textarea } from "./ui/textarea";
 type Posts = Awaited<ReturnType<typeof getPosts>>;
 type Post = Posts[number];
 
-function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
+function PostCard({ post, dbUserId }: { post: Post; dbUserId?: string | null }) {
   const { user } = useUser();
   const [newComment, setNewComment] = useState("");
   const [isCommenting, setIsCommenting] = useState(false);
@@ -25,6 +25,7 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
   const [hasLiked, setHasLiked] = useState(post.likes.some((like) => like.userId === dbUserId));
   const [optimisticLikes, setOptmisticLikes] = useState(post._count.likes);
   const [showComments, setShowComments] = useState(false);
+
 
   const handleLike = async () => {
     if (isLiking) return;
@@ -65,7 +66,7 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
       if (result.success) toast.success("Post deleted successfully");
       else throw new Error(result.error);
     } catch (error) {
-      toast.error("Failed to delete post");
+      toast.error("You cannot delete other users posts");
     } finally {
       setIsDeleting(false);
     }
