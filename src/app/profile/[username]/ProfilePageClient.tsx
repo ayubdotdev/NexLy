@@ -98,6 +98,7 @@ function ProfilePageClient({
       setIsLoading(true)
       setIsUpdatingFollow(true);
       await toggleFollow(user.id);
+      toast.success("User Followed successfully")
       setIsFollowing(!isFollowing);
     } catch (error) {
       toast.error("Failed to update follow status");
