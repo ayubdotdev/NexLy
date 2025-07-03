@@ -49,7 +49,6 @@ interface ProfilePageClientProps {
   followers: Followers;
   following: Following;
   isFollowing: boolean;
-  currentUserDbId: string | null; // Add this prop to pass the current user's database ID
 }
 
 function ProfilePageClient({
