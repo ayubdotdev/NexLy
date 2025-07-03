@@ -29,8 +29,11 @@ import {
   MapPinIcon,
   UsersIcon,
   UserPlusIcon,
+  Loader2,
+  Album,
+  AlbumIcon,
 } from "lucide-react";
-import { useState } from "react";
+import { startTransition, useState, useTransition } from "react";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import { getUserFollowers, getUserFollowing } from "@/actions/follows.action";
@@ -86,10 +89,13 @@ function ProfilePageClient({
     }
   };
 
+
+  const [isLoading, setIsLoading] = useState(false)
+
   const handleFollow = async () => {
     if (!currentUser) return;
-
     try {
+      setIsLoading(true)
       setIsUpdatingFollow(true);
       await toggleFollow(user.id);
       setIsFollowing(!isFollowing);
@@ -97,6 +103,7 @@ function ProfilePageClient({
       toast.error("Failed to update follow status");
     } finally {
       setIsUpdatingFollow(false);
+      setIsLoading(false)
     }
   };
 
@@ -122,20 +129,24 @@ function ProfilePageClient({
 
                 {/* PROFILE STATS */}
                 <div className="w-full mt-6">
-                  <div className="flex justify-between mb-4">
-                    <div>
-                      <div className="font-semibold">{user._count.following.toLocaleString()}</div>
-                      <div className="text-sm text-muted-foreground">Following</div>
+                  <div className="flex justify-around items-center gap-4 mb-4">
+                    <div className="text-center">
+                      <div className="font-semibold">{user._count.posts.toLocaleString()}</div>
+                      <div className="text-sm text-muted-foreground">Posts</div>
                     </div>
-                    <Separator orientation="vertical" />
-                    <div>
+
+                    <Separator orientation="vertical" className="h-10" />
+
+                    <div className="text-center">
                       <div className="font-semibold">{user._count.followers.toLocaleString()}</div>
                       <div className="text-sm text-muted-foreground">Followers</div>
                     </div>
-                    <Separator orientation="vertical" />
-                    <div>
-                      <div className="font-semibold">{user._count.posts.toLocaleString()}</div>
-                      <div className="text-sm text-muted-foreground">Posts</div>
+
+                    <Separator orientation="vertical" className="h-10" />
+
+                    <div className="text-center">
+                      <div className="font-semibold">{user._count.following.toLocaleString()}</div>
+                      <div className="text-sm text-muted-foreground">Following</div>
                     </div>
                   </div>
                 </div>
@@ -157,7 +168,8 @@ function ProfilePageClient({
                     disabled={isUpdatingFollow}
                     variant={isFollowing ? "outline" : "default"}
                   >
-                    {isFollowing ? "Unfollow" : "Follow"}
+                    {isLoading && <Loader2 className="size-4 animate-spin" />}
+                    <span>{isFollowing ? "Unfollow" : "Follow"}</span>
                   </Button>
                 )}
 
@@ -195,13 +207,13 @@ function ProfilePageClient({
         </div>
 
         <Tabs defaultValue="posts" className="w-full">
-          <TabsList className="w-full justify-start border-b rounded-none h-auto p-0 bg-transparent">
+          <TabsList className="w-full justify-center border-b rounded-none h-auto p-0 bg-transparent">
             <TabsTrigger
               value="posts"
               className="flex items-center gap-2 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary
                data-[state=active]:bg-transparent px-6 font-semibold"
             >
-              <FileTextIcon className="size-4" />
+              <Album className="size-4" />
               Posts
             </TabsTrigger>
             <TabsTrigger
@@ -221,7 +233,7 @@ function ProfilePageClient({
               <UserPlusIcon className="size-4" />
               Following
             </TabsTrigger>
-
+            {/* 
             <TabsTrigger
               value="likes"
               className="flex items-center gap-2 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary
@@ -229,7 +241,7 @@ function ProfilePageClient({
             >
               <HeartIcon className="size-4" />
               Likes
-            </TabsTrigger>
+            </TabsTrigger> */}
           </TabsList>
 
           <TabsContent value="posts" className="mt-6">
@@ -270,8 +282,8 @@ function ProfilePageClient({
                         </div>
                       </Link>
                       <div className="text-right text-sm text-muted-foreground">
-                        <div>{follower._count.followers} followers</div>
-                        <div>{follower._count.following} following</div>
+                        <div>{follower._count.followers} Followers</div>
+                        <div>{follower._count.following} Following</div>
                       </div>
                     </div>
                   </Card>
@@ -321,7 +333,7 @@ function ProfilePageClient({
               )}
             </div>
           </TabsContent>
-
+          {/* 
           <TabsContent value="likes" className="mt-6">
             <div className="space-y-6">
               {likedPosts.length > 0 ? (
@@ -330,7 +342,7 @@ function ProfilePageClient({
                 <div className="text-center py-8 text-muted-foreground">No liked posts to show</div>
               )}
             </div>
-          </TabsContent>
+          </TabsContent> */}
 
         </Tabs>
 
@@ -386,6 +398,7 @@ function ProfilePageClient({
             </div>
           </DialogContent>
         </Dialog>
+
       </div>
     </div>
   );

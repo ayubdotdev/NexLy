@@ -26,7 +26,6 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId?: string | null }) 
   const [optimisticLikes, setOptmisticLikes] = useState(post._count.likes);
   const [showComments, setShowComments] = useState(false);
 
-
   const handleLike = async () => {
     if (isLiking) return;
     try {
@@ -72,6 +71,10 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId?: string | null }) 
     }
   };
 
+  // Check if current logged-in user is the post author
+  const isCurrentUserPostAuthor = user?.username === post.author.username || 
+    user?.emailAddresses[0]?.emailAddress.split("@")[0] === post.author.username;
+
   return (
     <Card className="overflow-hidden">
       <CardContent className="p-4 sm:p-6">
@@ -99,8 +102,8 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId?: string | null }) 
                     <span>{formatDistanceToNow(new Date(post.createdAt))} ago</span>
                   </div>
                 </div>
-                {/* Check if current user is the post author */}
-                {dbUserId === post.author.id && (
+                {/* Show delete button only if current logged-in user is the post author */}
+                {isCurrentUserPostAuthor && (
                   <DeleteAlertDialog isDeleting={isDeleting} onDelete={handleDeletePost} />
                 )}
               </div>

@@ -2,11 +2,6 @@
 import prisma from "@/lib/prisma";
 import { getDbUserId } from "./user.action";
 import { revalidatePath } from "next/cache";
-import { use } from "react";
-import { AwardIcon } from "lucide-react";
-import { threadId } from "worker_threads";
-import { error } from "console";
-import { pid } from "process";
 
 export async function createPost(content: string, image: string) {
     try {

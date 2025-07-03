@@ -43,9 +43,9 @@ export default function RootLayout({
           >
             <PageLoader />
 
-            <VioletStormBackground>
               <div className="min-h-screen">
                 <Navbar />
+            <VioletStormBackground>
 
                 <main className="py-8">
                   {/* container to center the content */}
@@ -58,9 +58,9 @@ export default function RootLayout({
                     </div>
                   </div>
                 </main>
+            </VioletStormBackground>
               </div>
               <Toaster />
-            </VioletStormBackground>
           </ThemeProvider>
         </body>
       </html>

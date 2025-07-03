@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { searchUsers, toggleFollow } from "@/actions/user.action";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { SearchIcon, UserIcon } from "lucide-react";
