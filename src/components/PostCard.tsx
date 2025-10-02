@@ -12,6 +12,7 @@ import { DeleteAlertDialog } from "./DeleteAlertDialog";
 import { Button } from "./ui/button";
 import { HeartIcon, LogInIcon, MessageCircleIcon, SendIcon } from "lucide-react";
 import { Textarea } from "./ui/textarea";
+import { moderateContent } from "@/actions/modertaion.action";
 
 type Posts = Awaited<ReturnType<typeof getPosts>>;
 type Post = Posts[number];
@@ -43,6 +44,17 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId?: string | null }) 
 
   const handleAddComment = async () => {
     if (!newComment.trim() || isCommenting) return;
+    
+    // Moderate content before posting
+    const moderationResult = moderateContent(newComment);
+    
+    if (!moderationResult.isValid) {
+      toast.error(moderationResult.message || "Your comment contains inappropriate content", {
+        duration: 4000,
+        });
+      return;
+    }
+
     try {
       setIsCommenting(true);
       const result = await createComment(post.id, newComment);

@@ -1,3 +1,4 @@
+// src/components/CreatePost.tsx
 "use client"
 
 import { useUser } from "@clerk/nextjs"
@@ -5,12 +6,11 @@ import { useState } from "react"
 import { Card, CardContent } from "./ui/card"
 import { Avatar, AvatarImage } from "./ui/avatar"
 import { Textarea } from "./ui/textarea"
-import { ImageIcon, Loader2Icon, SendIcon } from "lucide-react";
+import { ImageIcon, Loader2Icon, SendIcon, ShieldCheckIcon } from "lucide-react";
 import { Button } from "./ui/button"
 import toast from "react-hot-toast"
 import { createPost } from "@/actions/post.action"
 import ImageUpload from "./ImageUpload"
-
 
 function CreatePost() {
     const { user } = useUser()
@@ -25,31 +25,52 @@ function CreatePost() {
         setIsPosting(true);
         try {
             const result = await createPost(content, imageUrl);
+            
+            console.log("Post result:", result); // Debug log
+            
             if (result?.success) {
                 // reset the form
                 setContent("");
                 setImageUrl("");
                 setShowImageUpload(false);
 
-                toast.success("Post created successfully");
+                toast.success("Post created successfully! 🎉");
+            } else {
+                // Show moderation error or any other error
+                const errorMessage = result?.error || "Failed to create post";
+                toast.error(errorMessage, {
+                    duration: 5000,
+                     style: {
+                        background: '#FEE2E2',
+                        color: '#991B1B',
+                        border: '1px solid #FCA5A5',
+                    },
+                });
             }
         } catch (error) {
             console.error("Failed to create post:", error);
-            toast.error("Failed to create post");
+            toast.error("An unexpected error occurred");
         } finally {
             setIsPosting(false);
         }
     };
+
     return (
         <Card className="mb-6">
             <CardContent className="pt-6">
                 <div className="space-y-4">
+                    {/* Positive community message */}
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground bg-green-50 dark:bg-green-950/20 p-2 rounded-md">
+                        <ShieldCheckIcon className="size-4 text-green-600" />
+                        <span>Share positivity! This is a safe space for uplifting content.</span>
+                    </div>
+
                     <div className="flex space-x-4">
                         <Avatar className="w-10 h-10">
                             <AvatarImage src={user?.imageUrl || "/avatar.png"} />
                         </Avatar>
                         <Textarea
-                            placeholder="What's on your mind?"
+                            placeholder="Share something positive and uplifting..."
                             className="min-h-[100px] resize-none border-none focus-visible:ring-0 p-0 text-base"
                             value={content}
                             onChange={(e) => setContent(e.target.value)}
@@ -107,4 +128,5 @@ function CreatePost() {
         </Card>
     );
 }
+
 export default CreatePost;

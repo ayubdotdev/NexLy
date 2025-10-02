@@ -1,12 +1,29 @@
+// src/actions/post.action.ts
 "use server"
 import prisma from "@/lib/prisma";
 import { getDbUserId } from "./user.action";
 import { revalidatePath } from "next/cache";
+import { moderateContent } from "./modertaion.action";
 
 export async function createPost(content: string, image: string) {
     try {
         const userId = await getDbUserId()
-        if (!userId) return;
+        if (!userId) {
+            return { success: false, error: "You must be logged in to post" };
+        }
+
+        // Moderate content before creating post
+        if (content) {
+            const moderation = moderateContent(content);
+            if (!moderation.isValid) {
+                console.log("Content moderation failed:", moderation); // Debug log
+                return { 
+                    success: false, 
+                    error: moderation.message || "Your content contains words that don't align with our positive community values.",
+                    prohibitedWords: moderation.prohibitedWords 
+                };
+            }
+        }
 
         const post = await prisma.post.create({
             data: {
@@ -22,6 +39,7 @@ export async function createPost(content: string, image: string) {
         return { success: false, error: "Failed to create post" };
     }
 }
+
 export async function deletePost(postId: string) {
     try {
         const userId = await getDbUserId();
@@ -38,13 +56,14 @@ export async function deletePost(postId: string) {
             where: { id: postId },
         });
 
-        revalidatePath("/"); // purge the cache
+        revalidatePath("/");
         return { success: true };
     } catch (error) {
         console.error("Failed to delete post:", error);
         return { success: false, error: "Failed to delete post" };
     }
 }
+
 export async function getPosts() {
     try {
         const posts = await prisma.post.findMany({
@@ -95,12 +114,12 @@ export async function getPosts() {
         throw new Error("Failed to fetch posts");
     }
 }
+
 export async function toggleLike(postId: string) {
     try {
         const userId = await getDbUserId();
         if (!userId) return;
 
-        // check if like exists
         const existingLike = await prisma.like.findUnique({
             where: {
                 userId_postId: {
@@ -118,7 +137,6 @@ export async function toggleLike(postId: string) {
         if (!post) throw new Error("Post not found");
 
         if (existingLike) {
-            // unlike
             await prisma.like.delete({
                 where: {
                     userId_postId: {
@@ -128,7 +146,6 @@ export async function toggleLike(postId: string) {
                 },
             });
         } else {
-            // like and create notification (only if liking someone else's post)
             await prisma.$transaction([
                 prisma.like.create({
                     data: {
@@ -141,8 +158,8 @@ export async function toggleLike(postId: string) {
                         prisma.notification.create({
                             data: {
                                 type: "LIKE",
-                                userId: post.authorId, // recipient (post author)
-                                creatorId: userId, // person who liked
+                                userId: post.authorId,
+                                creatorId: userId,
                                 postId,
                             },
                         }),
@@ -158,12 +175,23 @@ export async function toggleLike(postId: string) {
         return { success: false, error: "Failed to toggle like" };
     }
 }
+
 export async function createComment(postId: string, content: string) {
   try {
     const userId = await getDbUserId();
 
     if (!userId) return;
     if (!content) throw new Error("Content is required");
+
+    // Moderate comment content before creating
+    const moderation = moderateContent(content);
+    if (!moderation.isValid) {
+        return { 
+            success: false, 
+            error: moderation.message,
+            prohibitedWords: moderation.prohibitedWords 
+        };
+    }
 
     const post = await prisma.post.findUnique({
       where: { id: postId },
@@ -172,9 +200,7 @@ export async function createComment(postId: string, content: string) {
 
     if (!post) throw new Error("Post not found");
 
-    // Create comment and notification in a transaction
     const [comment] = await prisma.$transaction(async (tx) => {
-      // Create comment first
       const newComment = await tx.comment.create({
         data: {
           content,
@@ -183,7 +209,6 @@ export async function createComment(postId: string, content: string) {
         },
       });
 
-      // Create notification if commenting on someone else's post
       if (post.authorId !== userId) {
         await tx.notification.create({
           data: {
@@ -206,4 +231,3 @@ export async function createComment(postId: string, content: string) {
     return { success: false, error: "Failed to create comment" };
   }
 }
-
