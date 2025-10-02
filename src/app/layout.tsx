@@ -7,7 +7,7 @@ import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/SideBar";
 import { Toaster } from "react-hot-toast";
 import VioletStormBackground from "@/components/ui/bg";
-import { PageLoader } from "@/components/PageLoader";
+import ChatbotButton from "@/components/ChatBot";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -41,8 +41,6 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <PageLoader />
-
               <div className="min-h-screen">
                 <Navbar />
             <VioletStormBackground>
@@ -54,7 +52,9 @@ export default function RootLayout({
                       <div className="hidden lg:block lg:col-span-3">
                         <Sidebar />
                       </div>
-                      <div className="lg:col-span-9">{children}</div>
+                      <div className="lg:col-span-9">{children}
+                        <ChatbotButton/>
+                      </div>
                     </div>
                   </div>
                 </main>
