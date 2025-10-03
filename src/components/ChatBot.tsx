@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { MessageCircle, X, Sparkles, Brain, Activity, BotIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
 
 export default function ChatbotButton() {
   const [isOpen, setIsOpen] = useState(false);

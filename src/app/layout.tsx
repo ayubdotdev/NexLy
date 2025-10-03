@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { ClerkProvider } from "@clerk/nextjs";
+import { ClerkProvider, SignedIn, SignIn, useAuth } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/theme-provider";
 import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/SideBar";
@@ -24,6 +24,7 @@ export const metadata: Metadata = {
   title: "NexLy",
   description: "A modern social media application powered by Next.js",
 };
+
 
 export default function RootLayout({
   children,
@@ -53,7 +54,9 @@ export default function RootLayout({
                         <Sidebar />
                       </div>
                       <div className="lg:col-span-9">{children}
-                        <ChatbotButton/>
+                          <SignedIn>
+                        <ChatbotButton   />
+                          </SignedIn>
                       </div>
                     </div>
                   </div>
