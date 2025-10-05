@@ -1,16 +1,16 @@
+// src/components/ChatBot.tsx
 "use client";
 
 import { useState, useEffect } from "react";
-import { MessageCircle, X, Sparkles, Brain, Activity, BotIcon } from "lucide-react";
+import { MessageCircle, X, Activity, BotIcon, Smile } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { useAuth } from "@clerk/nextjs";
 
 export default function ChatbotButton() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
 
   // Hide button on certain pages
-  const isHidden = pathname === "/chat" || pathname === "/depression";
+  const isHidden = pathname === "/chat" || pathname === "/depression" || pathname === "/mood-tracker";
 
   useEffect(() => {
     if (isHidden) setIsOpen(false);
@@ -28,7 +28,7 @@ export default function ChatbotButton() {
       {/* Floating Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 z-50 w-16 h-16 bg-gradient-to-b from-cyan-400 via-blue-500 to-indigo-500 rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 flex items-center justify-center group hover:scale-110 "
+        className="fixed bottom-6 right-6 z-50 w-16 h-16 bg-gradient-to-b from-cyan-400 via-blue-500 to-indigo-500 rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 flex items-center justify-center group hover:scale-110"
         aria-label="Open mental health support"
       >
         {isOpen ? (
@@ -49,7 +49,7 @@ export default function ChatbotButton() {
 
           {/* Modal Content */}
           <div className="text-center fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md mx-4">
-            <div className=" bg-white/90 dark:bg-gray-900/90 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 dark:border-gray-700 overflow-hidden">
+            <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 dark:border-gray-700 overflow-hidden">
               {/* Header */}
               <div className="bg-gradient-to-r from-indigo-500 to-blue-500 p-6 text-white">
                 <div className="flex flex-col items-center text-center gap-3">
@@ -66,7 +66,6 @@ export default function ChatbotButton() {
                 </button>
               </div>
 
-
               {/* Content */}
               <div className="p-6 text-center">
                 <h4 className="font-semibold text-xl mb-3 text-gray-900 dark:text-gray-100">
@@ -78,25 +77,33 @@ export default function ChatbotButton() {
 
                 {/* Options */}
                 <div className="space-y-4">
-                  {/* Reusable card style */}
                   {[
                     {
                       title: "AI Assistant",
                       desc: "Chat with our empathetic AI for emotional support and guidance",
                       icon: <BotIcon className="w-6 h-6 text-white" />,
+                      gradient: "from-indigo-500 via-blue-500 to-cyan-500",
                       path: "/chat",
                     },
                     {
                       title: "Depression Tracker",
                       desc: "Take a quick assessment to understand your mental wellness",
                       icon: <Activity className="w-6 h-6 text-white" />,
+                      gradient: "from-purple-500 via-pink-500 to-red-500",
                       path: "/depression",
+                    },
+                    {
+                      title: "Mood Tracker",
+                      desc: "Track your daily emotions and discover your mood patterns",
+                      icon: <Smile className="w-6 h-6 text-white" />,
+                      gradient: "from-yellow-500 via-green-500 to-blue-500",
+                      path: "/mood-tracker",
                     },
                   ].map((option, i) => (
                     <button
                       key={i}
                       onClick={() => handleNavigation(option.path)}
-                      className="w-full bg-gradient-to-br from-indigo-500 via-blue-500 to-cyan-500 text-white rounded-xl p-5 transition-all duration-300 hover:shadow-2xl hover:scale-[1.03] text-left group relative overflow-hidden"
+                      className={`w-full bg-gradient-to-br ${option.gradient} text-white rounded-xl p-5 transition-all duration-300 hover:shadow-2xl hover:scale-[1.03] text-left group relative overflow-hidden`}
                     >
                       <div className="flex items-start gap-4">
                         <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
@@ -107,7 +114,6 @@ export default function ChatbotButton() {
                           <p className="text-sm text-white/90">{option.desc}</p>
                         </div>
                       </div>
-                      {/* Glow effect */}
                       <div className="absolute inset-0 rounded-xl bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </button>
                   ))}

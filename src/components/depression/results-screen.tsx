@@ -40,7 +40,7 @@ export function ResultsScreen({
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
       <Card className="max-w-3xl w-full shadow-2xl border-0">
         <div className="bg-indigo-500 p-8 text-center text-white rounded-t-xl">
-          <Heart className="w-16 h-16 mx-auto mb-4" />
+          <Heart className=" fill-white w-16 h-16 mx-auto mb-4" />
           <h1 className="text-3xl font-bold mb-2">Assessment Complete</h1>
           <p className="text-white/90">Thank you for taking the time to share with us</p>
         </div>
@@ -59,7 +59,7 @@ export function ResultsScreen({
           <div className="bg-purple-50 dark:bg-gray-700 rounded-lg p-4 mb-6">
             <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
               Report Sent</p>
-            <p className="text-sm text-gray-700 dark:text-gray-300">
+            <p className="text-sm text-green-700 dark:text-green-500">
               A detailed report has been sent to your parent/guardian at{" "}
               <span className="font-semibold">{parentEmail}</span>.
             </p>

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, Loader2, Network, BotIcon } from "lucide-react";
+import { Send, Bot, Loader2, BotIcon } from "lucide-react";
+import { useUser } from "@clerk/nextjs";
 
 type Message = {
   role: "user" | "assistant";
@@ -10,11 +11,13 @@ type Message = {
 };
 
 export default function ChatPage() {
+  const { user } = useUser();
+  
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
       content:
-        "Hello! I'm NexlyAI, your mental wellness companion. I'm here to listen and support you. How are you feeling today?",
+        "Hello! I'm AI, your mental wellness companion. I'm here to listen and support you. How are you feeling today?",
       timestamp: new Date(),
     },
   ]);
@@ -86,13 +89,13 @@ export default function ChatPage() {
   return (
     <div className="max-w-4xl mx-auto h-[calc(100vh-8rem)] flex flex-col">
       {/* Header */}
-      <div className="bg-indigo-500  rounded-t-2xl p-6 text-white shadow-md">
+      <div className="bg-indigo-500 rounded-t-2xl p-6 text-white shadow-md">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm shadow-inner">
             <BotIcon className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold tracking-wide">NexlyAI</h1>
+            <h1 className="text-xl font-bold tracking-wide">AnchorSpaceAI</h1>
             <p className="text-sm text-white/80">
               Mental Wellness Companion 💙
             </p>
@@ -140,8 +143,20 @@ export default function ChatPage() {
             </div>
 
             {message.role === "user" && (
-              <div className="w-8 bg-blue-600 h-8 rounded-full dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
-                <User className="w-5 h-5 text-blue-600 dark:text-gray-300" />
+              <div className="w-8 h-8 rounded-full flex-shrink-0 overflow-hidden border-2 border-blue-600">
+                {user?.imageUrl ? (
+                  <img
+                    src={user.imageUrl}
+                    alt={user.firstName || "User"}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-blue-600 flex items-center justify-center">
+                    <span className="text-white text-sm font-semibold">
+                      {user?.firstName?.charAt(0) || user?.username?.charAt(0) || "U"}
+                    </span>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -149,7 +164,7 @@ export default function ChatPage() {
 
         {isLoading && (
           <div className="flex gap-3 justify-start">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-500 via-indigo-500 to-blue-600 flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center flex-shrink-0">
               <Bot className="w-5 h-5 text-white" />
             </div>
             <div className="bg-white dark:bg-gray-800 rounded-2xl px-4 py-3">
@@ -178,7 +193,7 @@ export default function ChatPage() {
           <button
             type="submit"
             disabled={isLoading || !input.trim()}
-            className="px-6 py-3 bg-indigo-500 to-blue-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-3 bg-indigo-500 text-white rounded-xl hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Send className="w-5 h-5" />
           </button>

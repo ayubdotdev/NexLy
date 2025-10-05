@@ -95,7 +95,7 @@ function MobileNavbar() {
                 <Button variant="ghost" asChild className="flex items-center gap-3 justify-start">
                   <Link href="/search" className="flex items-center gap-2">
                     <SearchIcon className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors duration-300" />
-                    <span className="text-sm transition-colors duration-300">Search NexLy</span>
+                    <span className="text-sm transition-colors duration-300">Search </span>
                   </Link>
                 </Button>
 

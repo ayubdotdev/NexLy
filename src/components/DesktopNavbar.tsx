@@ -29,7 +29,7 @@ async function DesktopNavbar() {
                 )}
               />
               <span className="hidden lg:flex items-center gap-1 transition-colors duration-300 ">
-                Search NexLy 
+                Search
               </span>
             </Link>
           </Button>

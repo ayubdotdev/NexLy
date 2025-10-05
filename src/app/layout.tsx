@@ -21,7 +21,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "NexLy",
+  title: "AnchorSpace",
   description: "A modern social media application powered by Next.js",
 };
 

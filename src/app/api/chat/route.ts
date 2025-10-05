@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { GoogleGenAI, HarmCategory, HarmBlockThreshold } from "@google/genai";
 
-const SYSTEM_PROMPT = `You are NexlyAI, a compassionate and empathetic mental health support companion. Your role is to:
+const SYSTEM_PROMPT = `You are AnchorSpaceAI, a compassionate and empathetic mental health support companion. Your role is to:
 
 1. Listen actively and validate feelings without judgment
 2. Provide emotional support and encouragement
@@ -33,6 +34,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const apiKey = process.env.GEMINI_API_KEY;
+    
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: "API key not configured" },
+        { status: 500 }
+      );
+    }
+
+    // Initialize the Google GenAI client
+    const ai = new GoogleGenAI({ apiKey });
+
     // Build the contents array for Gemini API
     const contents = [];
     
@@ -57,70 +70,41 @@ export async function POST(req: NextRequest) {
       });
     });
 
-    // Make direct API call to Gemini
-    const apiKey = process.env.GEMINI_API_KEY;
-    
-    if (!apiKey) {
-      return NextResponse.json(
-        { error: "API key not configured" },
-        { status: 500 }
-      );
-    }
-
-  const response = await fetch(
-  `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-  {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
+    // Generate response using the official SDK
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
       contents: contents,
-      generationConfig: {
+      config: {
         temperature: 0.9,
         topK: 40,
         topP: 0.95,
         maxOutputTokens: 2048,
+        safetySettings: [
+          {
+            category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+          },
+          {
+            category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+          },
+          {
+            category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+          },
+          {
+            category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+          },
+        ],
       },
-      safetySettings: [
-        {
-          category: "HARM_CATEGORY_HARASSMENT",
-          threshold: "BLOCK_MEDIUM_AND_ABOVE",
-        },
-        {
-          category: "HARM_CATEGORY_HATE_SPEECH",
-          threshold: "BLOCK_MEDIUM_AND_ABOVE",
-        },
-        {
-          category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-          threshold: "BLOCK_MEDIUM_AND_ABOVE",
-        },
-        {
-          category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-          threshold: "BLOCK_MEDIUM_AND_ABOVE",
-        },
-      ],
-    }),
-  }
-);
+    });
 
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Gemini API Error:", errorData);
-      return NextResponse.json(
-        { error: "Failed to generate response", details: errorData },
-        { status: response.status }
-      );
-    }
-
-    const data = await response.json();
-    
-    // Extract the text from the response
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    // Extract text using the SDK's text property
+    const text = response.text;
     
     if (!text) {
-      console.error("No text in response:", data);
+      console.error("No text in response:", response);
       return NextResponse.json(
         { error: "No response generated" },
         { status: 500 }
